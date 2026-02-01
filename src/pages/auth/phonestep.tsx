@@ -1,5 +1,4 @@
-import { MapPin } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { formatPhone } from '../../utils/formatters';
 import { useAuthStore } from '../../utils/localstorage';
@@ -25,10 +24,27 @@ export function PhoneStep() {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(countries[0]);
   const [value, setValue] = useState('');
+  const [error, setError] = useState('');
+  const [agreement, setAgreement] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const setPhone = useAuthStore((state) => state.setPhone);
   const navigate = useNavigate();
   const onSubmit = (data: { phone: string }) => {
-    setPhone(data.phone);
+    const digitsOnly = data.phone.replace(/\D/g, '');
+    if (digitsOnly.length < 10) {
+      setError('Пожалуйста, введите корректный номер телефона.');
+
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+      return;
+    }
+    if (!agreement) {
+      setError('Вы должны согласиться с политикой конфиденциальности, чтобы продолжить.');
+      return;
+    }
+    setError('');
+    setPhone(digitsOnly);
 
     setTimeout(() => {
       navigate('/role');
@@ -45,7 +61,10 @@ export function PhoneStep() {
         </p>
         <form
           className="space-y-4"
-          onSubmit={() => onSubmit({ phone: `${selected.code} ${value}` })}
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit({ phone: `${selected.code} ${value}` });
+          }}
         >
           <div className="relative w-full">
             <div className="flex border border-gray-300 rounded overflow-hidden">
@@ -58,6 +77,7 @@ export function PhoneStep() {
                 <span>{selected.code}</span>
               </button>
               <input
+                ref={inputRef}
                 type="tel"
                 inputMode="numeric"
                 value={value}
@@ -89,6 +109,8 @@ export function PhoneStep() {
               type="checkbox"
               id="privacy"
               className="w-4 h-4 text-blue-400 border-gray-300 rounded focus:ring-blue-400"
+              checked={agreement}
+              onChange={(e) => setAgreement(e.target.checked)}
             />
             <label htmlFor="privacy" className="text-gray-600 text-sm">
               Согласен с{' '}
@@ -97,6 +119,8 @@ export function PhoneStep() {
               </a>
             </label>
           </div>
+          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+
           <button
             type="submit"
             className="w-full py-3 bg-blue-100 text-blue-700 rounded font-semibold hover:bg-blue-200 transition"
@@ -104,9 +128,6 @@ export function PhoneStep() {
             Далее
           </button>
         </form>
-        <div className="mt-8 flex justify-end">
-          <MapPin className="w-10 h-10 text-blue-400" />
-        </div>
       </div>
     </div>
   );

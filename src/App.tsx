@@ -5,12 +5,13 @@ import { RoleStep } from './pages/auth/rolestep';
 import { OtpStep } from './pages/auth/otpstep';
 import { ProfileFormStep } from './pages/auth/profileformstep';
 import { Profile } from './pages/profile';
+import AuthIcons from './components/authicons';
 
 function App() {
   const location = useLocation();
   const showLayout = !location.pathname.startsWith('/profile');
   return (
-    <div className="min-w-screen min-h-screen overflow-hidden grid grid-cols-2">
+    <div className="min-w-screen min-h-screen overflow-hidden grid grid-cols-2 max-md:flex max-md:flex-col">
       {showLayout && <AuthLayout />}
       <Routes>
         <Route path="/" element={<PhoneStep />} />
@@ -19,6 +20,8 @@ function App() {
         <Route path="/form" element={<ProfileFormStep />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
+
+      <AuthIcons />
     </div>
   );
 }

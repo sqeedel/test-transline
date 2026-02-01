@@ -4,8 +4,9 @@ export type ProfileData = {
   firstName: string;
   lastName: string;
   middleName?: string;
+  iinOrBin?: number;
   email: string;
-  iinOrBin: string;
+  password: string;
 };
 
 export type AuthState = {
